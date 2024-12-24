@@ -2,9 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.todoRouter = void 0;
 const express_1 = require("express");
+const todo_1 = require("../controllers/todo");
 exports.todoRouter = (0, express_1.Router)();
-exports.todoRouter.get("/", (req, res, next) => {
-    res.json({
-        message: "TESTING PURPOSE"
-    });
-});
+exports.todoRouter.get('/', todo_1.getTodos);
+exports.todoRouter.post('/', todo_1.createTodo);
+exports.todoRouter.patch('/:id', todo_1.updateTodo);
+exports.todoRouter.delete('/:id', todo_1.deleteTodo);

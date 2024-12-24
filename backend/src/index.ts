@@ -4,6 +4,7 @@ import { userRouter } from './routes/user'
 import { todoRouter } from './routes/todo'
 import cors from 'cors'
 import dotenv from 'dotenv'
+import { authenticationToken } from './middlewares/authMiddleware';
 
 dotenv.config();
 
@@ -23,7 +24,7 @@ async function main() {
 
 main()
 
-app.use( '/api/v1/user', userRouter);
-app.use('/api/v1/todo', todoRouter);
+app.use( '/user', userRouter);
+app.use('/todos', authenticationToken, todoRouter);
 
 app.listen(PORT, () => console.log(`Server Started at Port:${PORT}`))

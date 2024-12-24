@@ -6,7 +6,7 @@ const UserSchema = new Schema({
 })
 
 const TodoSchema = new Schema({
-    userId: {type: mongoose.Types.ObjectId, required: true, ref: 'User'},
+    userId: {type: mongoose.Types.ObjectId, ref: 'User'},
     title: {type: String, required: true},
     completed: {type: Boolean, default: false}
 }) 

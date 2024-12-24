@@ -40,7 +40,7 @@ const UserSchema = new mongoose_1.Schema({
     password: { type: String }
 });
 const TodoSchema = new mongoose_1.Schema({
-    userId: { type: mongoose_1.default.Types.ObjectId, required: true, ref: 'User' },
+    userId: { type: mongoose_1.default.Types.ObjectId, ref: 'User' },
     title: { type: String, required: true },
     completed: { type: Boolean, default: false }
 });

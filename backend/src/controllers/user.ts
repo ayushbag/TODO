@@ -63,7 +63,7 @@ export const handleSignin = async(req: Request, res: Response) => {
         try {
             const token  = jwt.sign({
                 id: user.email.toString()
-            }, process.env.JWT_USER_PASSWORD as string)
+            }, process.env.JWT_SECRET as string)
     
             res.status(200).json({
                 message: "Signin Succeeded!",

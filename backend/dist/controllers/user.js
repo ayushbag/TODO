@@ -51,30 +51,6 @@ const handleSignup = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     }
 });
 exports.handleSignup = handleSignup;
-// export const handleSignin = async (req:Request<{},{},UserType> , res: Response) => {
-//     const { email, password } = req.body;
-//     const user = await UserModel.findOne({ email }) as UserType || null;
-//     if (!user) {
-//         res.status(500).json({
-//             message: "User doesn't exists. Signup!"
-//         })
-//     }
-//     const hashPassword = user.password;
-//     const compareHashedPassword = await bcrypt.compare(password, hashPassword) 
-//     if (compareHashedPassword) {
-//         const token = jwt.sign({
-//             id: user.email.toString()
-//         }, process.env.JWT_USER_PASSWORD as string) 
-//         res.status(200).json({
-//             message: "Signin Succeeded",
-//             token: token
-//         })
-//     } else {
-//         res.status(500).json({
-//             message: "An error occurred during sign-in. Please try again later."
-//         })
-//     }
-// }
 const handleSignin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, password } = req.body;
     const user = (yield db_1.UserModel.findOne({ email })) || null;
@@ -89,7 +65,7 @@ const handleSignin = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         try {
             const token = jsonwebtoken_1.default.sign({
                 id: user.email.toString()
-            }, process.env.JWT_USER_PASSWORD);
+            }, process.env.JWT_SECRET);
             res.status(200).json({
                 message: "Signin Succeeded!",
                 token
