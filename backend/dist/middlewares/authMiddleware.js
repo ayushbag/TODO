@@ -19,7 +19,12 @@ const authenticationToken = (req, res, next) => {
         if (err) {
             return res.status(403).json({ message: "token invalid!" });
         }
-        req.user = decoded.user;
+        if (!decoded.userId) {
+            return res.status(400).json({ message: "Invalid token structure!" });
+        }
+        console.log(decoded);
+        req.user = { userId: decoded.userId };
+        ;
         next();
     });
 };

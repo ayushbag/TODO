@@ -13,8 +13,16 @@ exports.deleteTodo = exports.updateTodo = exports.createTodo = exports.getTodos 
 const db_1 = require("../db");
 const getTodos = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
-    const todos = yield db_1.TodoModel.find({ userId: (_a = req.user) === null || _a === void 0 ? void 0 : _a.userId });
-    res.json(todos);
+    try {
+        const todos = yield db_1.TodoModel.find({ userId: (_a = req.user) === null || _a === void 0 ? void 0 : _a.userId });
+        res.json(todos);
+    }
+    catch (error) {
+        res.status(500).json({
+            message: "Error fetching Todos",
+            error
+        });
+    }
 });
 exports.getTodos = getTodos;
 const createTodo = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -31,7 +39,7 @@ const createTodo = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         console.log(err);
         res.status(400).json({
             message: "Error while creation of Todo!",
-            err
+            err,
         });
     }
 });
@@ -43,14 +51,14 @@ const updateTodo = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         const updateTodo = yield db_1.TodoModel.findByIdAndUpdate(id, { completed }, { new: true });
         res.status(200).json({
             message: "Updated Todo!",
-            updateTodo
+            updateTodo,
         });
     }
     catch (err) {
         console.log(err);
         res.status(401).json({
             message: "Error while updation!",
-            err
+            err,
         });
     }
 });
@@ -61,11 +69,11 @@ const deleteTodo = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         const deletedTodo = yield db_1.TodoModel.findOneAndDelete({ _id: id });
         if (!deletedTodo) {
             return res.status(400).json({
-                message: "Todo not found!"
+                message: "Todo not found!",
             });
         }
         res.status(203).send({
-            message: "Todo Deleted Successfully"
+            message: "Todo Deleted Successfully",
         });
     }
     catch (err) {
@@ -73,7 +81,7 @@ const deleteTodo = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         console.log("--------------------------");
         res.status(403).json({
             message: "Error while deletion",
-            err
+            err,
         });
     }
 });

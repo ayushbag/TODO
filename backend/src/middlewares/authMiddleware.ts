@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import "dotenv/config";
 
 export const authenticationToken = (
-  req: Request & { user?: string },
+  req: Request & { user?: { userId: string } },
   res: Response,
   next: NextFunction
 ): void => {
@@ -21,7 +21,13 @@ export const authenticationToken = (
     if (err) {
       return res.status(403).json({ message: "token invalid!" });
     }
-    req.user = decoded.user;
+
+    if (!decoded.userId) {
+      return res.status(400).json({ message: "Invalid token structure!" });
+    }
+
+    console.log(decoded);
+    req.user = { userId: decoded.userId }; ;
     next();
   });
 };

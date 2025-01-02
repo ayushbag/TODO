@@ -1,9 +1,10 @@
 import { Router } from "express";
 import { getTodos, createTodo, updateTodo, deleteTodo } from "../controllers/todo";
+import { authenticationToken } from "../middlewares/authMiddleware";
 
 export const todoRouter = Router()
 
-todoRouter.get('/', getTodos)
-todoRouter.post('/', createTodo)
-todoRouter.patch('/:id', updateTodo)
-todoRouter.delete('/:id', deleteTodo)
+todoRouter.get('/', authenticationToken, getTodos)
+todoRouter.post('/', authenticationToken ,createTodo)
+todoRouter.patch('/:id',authenticationToken, updateTodo)
+todoRouter.delete('/:id',authenticationToken, deleteTodo)
