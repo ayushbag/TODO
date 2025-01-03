@@ -7,5 +7,6 @@ const authMiddleware_1 = require("../middlewares/authMiddleware");
 exports.todoRouter = (0, express_1.Router)();
 exports.todoRouter.get('/', authMiddleware_1.authenticationToken, todo_1.getTodos);
 exports.todoRouter.post('/', authMiddleware_1.authenticationToken, todo_1.createTodo);
-exports.todoRouter.patch('/:id', authMiddleware_1.authenticationToken, todo_1.updateTodo);
+exports.todoRouter.patch('/status/:id', authMiddleware_1.authenticationToken, todo_1.updateTodoStatus);
+exports.todoRouter.patch('/title/:id', authMiddleware_1.authenticationToken, todo_1.updateTodoTitle);
 exports.todoRouter.delete('/:id', authMiddleware_1.authenticationToken, todo_1.deleteTodo);

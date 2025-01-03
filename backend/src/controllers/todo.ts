@@ -34,7 +34,7 @@ export const createTodo = async (req: AuthenticationRequest, res: Response) => {
   }
 };
 
-export const updateTodo = async (req: AuthenticationRequest, res: Response) => {
+export const updateTodoStatus = async (req: AuthenticationRequest, res: Response) => {
   try {
     const { id } = req.params;
     const { completed } = req.body;
@@ -55,6 +55,26 @@ export const updateTodo = async (req: AuthenticationRequest, res: Response) => {
     });
   }
 };
+
+export const updateTodoTitle = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { title } = req.body;
+    const todo = await TodoModel.findByIdAndUpdate(
+      id,
+      { title }
+    )
+    res.status(200).json({
+      message: "todo updated Successfully",
+      todo
+    })
+  } catch (error) {
+    res.status(500).json({
+      message: "eroor while updating todo",
+      error
+    })    
+  }
+}
 
 export const deleteTodo = async (
   req: AuthenticationRequest,

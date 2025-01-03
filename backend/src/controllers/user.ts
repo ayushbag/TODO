@@ -26,9 +26,17 @@ export const handleSignup = async (
     return;
   }
 
-  const { email, password } = req.body;
+  const { email, password } = parsedDataWithSuccess.data;
 
   try {
+    const existingUser = await UserModel.findOne({ email });
+    if (existingUser) {
+      res.status(400).json({
+        message: "User already exists",
+      });
+      return;
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
     await UserModel.create({
       email: email,
@@ -36,10 +44,10 @@ export const handleSignup = async (
     });
 
     res.json({
-      message: "Signup Succeded",
+      message: "Signup Succeeded",
     });
   } catch (e: any) {
-    console.log("Error while signup!", e);
+    console.log("Error during signup!", e);
     res.status(500).json({
       message: "Error during signup. Please try again later.",
       error: e.message,
@@ -48,40 +56,64 @@ export const handleSignup = async (
 };
 
 export const handleSignin = async (req: Request, res: Response) => {
-  const { email, password } = req.body;
+  const requiredBody = z.object({
+    email: z.string().email(),
+    password: z.string().min(8, "Password should be atleast 8 characters"),
+  });
 
-  const user = ((await UserModel.findOne({ email })) as UserType) || null;
+  const parsedDataWithSuccess = requiredBody.safeParse(req.body);
 
-  if (!user) {
-    res.status(500).json({
-      message: "user doesnt Exits!",
+  if (!parsedDataWithSuccess.success) {
+    res.status(400).json({
+      message: "incorrect format",
+      error: parsedDataWithSuccess.error,
     });
+    return;
   }
 
-  const hashPassword = user.password;
-  const compareHashedPassword = await bcrypt.compare(password, hashPassword);
+  const { email, password } = parsedDataWithSuccess.data;
 
-  if (compareHashedPassword) {
-    try {
-      const token = jwt.sign(
-        { userId: user._id },
-        process.env.JWT_SECRET as string,
-        { expiresIn: '1hr' }
-      );
+  try {
+    const user = ((await UserModel.findOne({ email })) as UserType) || null;
 
-      res.status(200).json({
-        message: "Signin Succeeded!",
-        token,
+    if (!user) {
+      res.status(404).json({
+        message: "User doesn't exist!",
       });
-    } catch (error: any) {
-      res.status(500).json({
-        message: "Signin Failed Try Again!",
-        error: error.message,
+      return;
+    }
+
+    const hashPassword = user.password;
+    const compareHashedPassword = await bcrypt.compare(password, hashPassword);
+
+    if (compareHashedPassword) {
+      try {
+        const token = jwt.sign(
+          { userId: user._id },
+          process.env.JWT_SECRET as string,
+          { expiresIn: '1hr' }
+        );
+
+        res.status(200).json({
+          message: "Signin Succeeded!",
+          token,
+        });
+      } catch (error: any) {
+        res.status(500).json({
+          message: "Signin Failed Try Again!",
+          error: error.message,
+        });
+      }
+    } else {
+      res.status(401).json({
+        message: "Incorrect Password!",
       });
     }
-  } else {
-    res.status(401).json({
-      message: "Incorrect Password!",
+  } catch (e: any) {
+    console.log("Error during signin!", e);
+    res.status(500).json({
+      message: "Error during signin. Please try again later.",
+      error: e.message,
     });
   }
 };

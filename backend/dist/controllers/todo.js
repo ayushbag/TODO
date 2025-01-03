@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteTodo = exports.updateTodo = exports.createTodo = exports.getTodos = void 0;
+exports.deleteTodo = exports.updateTodoTitle = exports.updateTodoStatus = exports.createTodo = exports.getTodos = void 0;
 const db_1 = require("../db");
 const getTodos = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
@@ -44,7 +44,7 @@ const createTodo = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
 });
 exports.createTodo = createTodo;
-const updateTodo = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const updateTodoStatus = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
         const { completed } = req.body;
@@ -62,7 +62,25 @@ const updateTodo = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         });
     }
 });
-exports.updateTodo = updateTodo;
+exports.updateTodoStatus = updateTodoStatus;
+const updateTodoTitle = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { id } = req.params;
+        const { title } = req.body;
+        const todo = yield db_1.TodoModel.findByIdAndUpdate(id, { title });
+        res.status(200).json({
+            message: "todo updated Successfully",
+            todo
+        });
+    }
+    catch (error) {
+        res.status(500).json({
+            message: "eroor while updating todo",
+            error
+        });
+    }
+});
+exports.updateTodoTitle = updateTodoTitle;
 const deleteTodo = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;

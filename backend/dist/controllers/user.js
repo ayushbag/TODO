@@ -32,19 +32,26 @@ const handleSignup = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         });
         return;
     }
-    const { email, password } = req.body;
+    const { email, password } = parsedDataWithSuccess.data;
     try {
+        const existingUser = yield db_1.UserModel.findOne({ email });
+        if (existingUser) {
+            res.status(400).json({
+                message: "User already exists",
+            });
+            return;
+        }
         const hashedPassword = yield bcryptjs_1.default.hash(password, 10);
         yield db_1.UserModel.create({
             email: email,
             password: hashedPassword,
         });
         res.json({
-            message: "Signup Succeded",
+            message: "Signup Succeeded",
         });
     }
     catch (e) {
-        console.log("Error while signup!", e);
+        console.log("Error during signup!", e);
         res.status(500).json({
             message: "Error during signup. Please try again later.",
             error: e.message,
@@ -53,33 +60,55 @@ const handleSignup = (req, res) => __awaiter(void 0, void 0, void 0, function* (
 });
 exports.handleSignup = handleSignup;
 const handleSignin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { email, password } = req.body;
-    const user = (yield db_1.UserModel.findOne({ email })) || null;
-    if (!user) {
-        res.status(500).json({
-            message: "user doesnt Exits!",
+    const requiredBody = zod_1.z.object({
+        email: zod_1.z.string().email(),
+        password: zod_1.z.string().min(8, "Password should be atleast 8 characters"),
+    });
+    const parsedDataWithSuccess = requiredBody.safeParse(req.body);
+    if (!parsedDataWithSuccess.success) {
+        res.status(400).json({
+            message: "incorrect format",
+            error: parsedDataWithSuccess.error,
         });
+        return;
     }
-    const hashPassword = user.password;
-    const compareHashedPassword = yield bcryptjs_1.default.compare(password, hashPassword);
-    if (compareHashedPassword) {
-        try {
-            const token = jsonwebtoken_1.default.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1hr' });
-            res.status(200).json({
-                message: "Signin Succeeded!",
-                token,
+    const { email, password } = parsedDataWithSuccess.data;
+    try {
+        const user = (yield db_1.UserModel.findOne({ email })) || null;
+        if (!user) {
+            res.status(404).json({
+                message: "User doesn't exist!",
+            });
+            return;
+        }
+        const hashPassword = user.password;
+        const compareHashedPassword = yield bcryptjs_1.default.compare(password, hashPassword);
+        if (compareHashedPassword) {
+            try {
+                const token = jsonwebtoken_1.default.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1hr' });
+                res.status(200).json({
+                    message: "Signin Succeeded!",
+                    token,
+                });
+            }
+            catch (error) {
+                res.status(500).json({
+                    message: "Signin Failed Try Again!",
+                    error: error.message,
+                });
+            }
+        }
+        else {
+            res.status(401).json({
+                message: "Incorrect Password!",
             });
         }
-        catch (error) {
-            res.status(500).json({
-                message: "Signin Failed Try Again!",
-                error: error.message,
-            });
-        }
     }
-    else {
-        res.status(401).json({
-            message: "Incorrect Password!",
+    catch (e) {
+        console.log("Error during signin!", e);
+        res.status(500).json({
+            message: "Error during signin. Please try again later.",
+            error: e.message,
         });
     }
 });
