@@ -1,20 +1,10 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteTodo = exports.updateTodoTitle = exports.updateTodoStatus = exports.createTodo = exports.getTodos = void 0;
 const db_1 = require("../db");
-const getTodos = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
+const getTodos = async (req, res) => {
     try {
-        const todos = yield db_1.TodoModel.find({ userId: (_a = req.user) === null || _a === void 0 ? void 0 : _a.userId });
+        const todos = await db_1.TodoModel.find({ userId: req.user?.userId });
         res.json(todos);
     }
     catch (error) {
@@ -23,14 +13,13 @@ const getTodos = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             error
         });
     }
-});
+};
 exports.getTodos = getTodos;
-const createTodo = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
+const createTodo = async (req, res) => {
     try {
         const { title } = req.body;
-        const newTodo = new db_1.TodoModel({ userId: (_a = req.user) === null || _a === void 0 ? void 0 : _a.userId, title });
-        yield newTodo.save();
+        const newTodo = new db_1.TodoModel({ userId: req.user?.userId, title });
+        await newTodo.save();
         res.status(201).json({
             newTodo,
         });
@@ -42,13 +31,13 @@ const createTodo = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             err,
         });
     }
-});
+};
 exports.createTodo = createTodo;
-const updateTodoStatus = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const updateTodoStatus = async (req, res) => {
     try {
         const { id } = req.params;
         const { completed } = req.body;
-        const updateTodo = yield db_1.TodoModel.findByIdAndUpdate(id, { completed }, { new: true });
+        const updateTodo = await db_1.TodoModel.findByIdAndUpdate(id, { completed }, { new: true });
         res.status(200).json({
             message: "Updated Todo!",
             updateTodo,
@@ -61,13 +50,13 @@ const updateTodoStatus = (req, res) => __awaiter(void 0, void 0, void 0, functio
             err,
         });
     }
-});
+};
 exports.updateTodoStatus = updateTodoStatus;
-const updateTodoTitle = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const updateTodoTitle = async (req, res) => {
     try {
         const { id } = req.params;
         const { title } = req.body;
-        const todo = yield db_1.TodoModel.findByIdAndUpdate(id, { title });
+        const todo = await db_1.TodoModel.findByIdAndUpdate(id, { title });
         res.status(200).json({
             message: "todo updated Successfully",
             todo
@@ -79,12 +68,12 @@ const updateTodoTitle = (req, res) => __awaiter(void 0, void 0, void 0, function
             error
         });
     }
-});
+};
 exports.updateTodoTitle = updateTodoTitle;
-const deleteTodo = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const deleteTodo = async (req, res) => {
     try {
         const { id } = req.params;
-        const deletedTodo = yield db_1.TodoModel.findOneAndDelete({ _id: id });
+        const deletedTodo = await db_1.TodoModel.findOneAndDelete({ _id: id });
         if (!deletedTodo) {
             return res.status(400).json({
                 message: "Todo not found!",
@@ -102,5 +91,5 @@ const deleteTodo = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             err,
         });
     }
-});
+};
 exports.deleteTodo = deleteTodo;
