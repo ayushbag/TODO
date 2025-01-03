@@ -8,7 +8,6 @@ const Home = () => {
   const [todo, setTodo] = useState("");
   const [editingTodoId, setEditingTodoId] = useState<string | null>(null);
   const [updatedTitle, setUpdatedTitle] = useState("");
-  const [reloadPage, setReloadPage] = useState(false);
 
   const navigate = useNavigate();
 
@@ -21,7 +20,7 @@ const Home = () => {
           navigate("/login");
           return;
         }
-        const response = await axios.get("http://localhost:8000/todos", {
+        const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/todos`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -34,7 +33,7 @@ const Home = () => {
     }
 
     getAllTodos();
-  }, [todo, reloadPage]);
+  }, [todo]);
 
   async function createTodo(e: React.ChangeEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -52,7 +51,7 @@ const Home = () => {
       }
 
       const response = await axios.post(
-        "http://localhost:8000/todos",
+        `${import.meta.env.VITE_BACKEND_URL}/todos`,
         {
           title: todo,
           completed: false,
@@ -80,7 +79,7 @@ const Home = () => {
         return;
       }
 
-      await axios.delete(`http://localhost:8000/todos/${todoId}`, {
+      await axios.delete(`${import.meta.env.VITE_BACKEND_URL}/todos/${todoId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -110,8 +109,19 @@ const Home = () => {
 
       const updatedCompleted = !todoToUpdate.completed;
 
-      const response = await axios.patch(
-        `http://localhost:8000/todos/status/${todoId}`,
+      setAllTodos((prevTodo) =>
+        prevTodo.map((todo) =>
+          todo._id === todoId
+            ? {
+                ...todo,
+                completed: updatedCompleted,
+              }
+            : todo
+        )
+      );
+
+      await axios.patch(
+        `${import.meta.env.VITE_BACKEND_URL}/todos/status/${todoId}`,
         {
           completed: updatedCompleted,
         },
@@ -120,17 +130,6 @@ const Home = () => {
             Authorization: `Bearer ${token}`,
           },
         }
-      );
-
-      setAllTodos((prevTodo) =>
-        prevTodo.map((todo) =>
-          todo._id === todoId
-            ? {
-                ...todo,
-                completed: response.data.completed,
-              }
-            : todo
-        )
       );
     } catch (error) {
       console.log("Error while update", error);
@@ -148,32 +147,26 @@ const Home = () => {
       const todoToUpdate = allTodos.find((todo) => todo._id === todoId);
 
       if (!todoToUpdate) {
-        console.log("todo doesn't exists!");
+        console.log("todo doesn't exist!");
+        return;
       }
 
-      const updatedCompleted = updateTodo;
+      setAllTodos((prevTodos) =>
+        prevTodos.map((todo) =>
+          todo._id === todoId ? { ...todo, title: updateTodo } : todo
+        )
+      );
 
-      const response = await axios.patch(
-        `http://localhost:8000/todos/title/${todoId}`,
+      await axios.patch(
+        `${import.meta.env.VITE_BACKEND_URL}/todos/title/${todoId}`,
         {
-          title: updatedCompleted,
+          title: updateTodo,
         },
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
-      );
-
-      setAllTodos((prevTodo) =>
-        prevTodo.map((todo) =>
-          todo._id === todoId
-            ? {
-                ...todo,
-                title: response.data.title,
-              }
-            : todo
-        )
       );
     } catch (error) {
       console.log("error while updating title", error);
@@ -226,7 +219,6 @@ const Home = () => {
         className="accent-blue-500"
         onChange={() => {
           handleStatus(todo._id);
-          setReloadPage(!reloadPage);
         }}
         name="completed"
         id="completed"
@@ -248,7 +240,6 @@ const Home = () => {
           updateTodoTitle(todo._id, updatedTitle);
           setEditingTodoId(null);
           setUpdatedTitle("");
-          setReloadPage(!reloadPage);
         } else {
           alert("Title cannot be empty!");
         }

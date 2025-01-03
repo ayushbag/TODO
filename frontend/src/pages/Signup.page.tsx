@@ -22,7 +22,7 @@ const Signup = () => {
   const handleOnClick = async (e: any) => {
     e.preventDefault()
     try {
-      const response = await axios.post(`http://localhost:8000/user/signup`, { email, password })
+      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/user/signup`, { email, password })
       if (!response) {
         console.log("Error While Signup")  
       } 
